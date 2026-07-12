@@ -44,15 +44,18 @@
   overflow: hidden;
 }
 
-/* ── SYSTEM LABELS ── */
+/* ── SYSTEM LABELS ──
+   Redefinida a Inter (era JetBrains Mono uppercase — estética HUD).
+   Los textos ya escritos en mayúscula en el código siguen viéndose en
+   mayúscula (son literales); el copy nuevo se escribe en sentence case
+   y sale así, sin forzar transform. */
 .sys-label {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: var(--font-body);
   font-size: var(--text-xs);
-  letter-spacing: 0.12em;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--violet-soft);
-  opacity: 0.75;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  opacity: 1;
 }
 .sys-value {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
