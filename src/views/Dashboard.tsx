@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Zap, Newspaper, Calendar,
-  Check, X, Brain, Mic, ArrowUp, Play, Pause, RotateCcw, Target,
+  Zap, Calendar,
+  Check, X, Mic, ArrowUp, Play, Pause, RotateCcw, Target,
 } from 'lucide-react';
 import { LineChart, Line, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useApp } from '../context/AppContext';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useStreaks, calcScore, saveDailyScore, getDailyScores } from '../hooks/useStreaks';
 import { cn } from '../lib/utils';
-import { hablarTexto, hablarConCallback, detenerVoz, pausarVoz, reanudarVoz } from '../services/voiceService';
+import { hablarConCallback, detenerVoz, pausarVoz, reanudarVoz } from '../services/voiceService';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -39,11 +39,24 @@ function BriefingText({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         i % 2 === 1
-          ? <strong key={i} style={{ color: 'var(--honey-bright)', fontWeight: 600 }}>{p}</strong>
+          ? <span key={i} className="hl-honey">{p}</span>
           : <span key={i}>{p}</span>
       )}
     </>
   );
+}
+
+const COLMENA_LINES = [
+  '¿Arrancamos tranquilos?',
+  'Ayer cerraste todo. Veamos hoy.',
+  'Un día más, un paso más.',
+  '¿Cómo vino durmiendo?',
+  'Acá ando, esperándote.',
+];
+
+function lineaDelDia(): string {
+  const dia = new Date().getDate();
+  return COLMENA_LINES[dia % COLMENA_LINES.length];
 }
 
 // ── BriefingHeroCard ───────────────────────────────────────────────
@@ -111,16 +124,10 @@ function BriefingHeroCard({ onPlay, text }: { onPlay?: () => void; text: string 
 
       {/* Card header */}
       <div className="flex items-center justify-between mb-3">
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: 9, fontWeight: 700, color: 'var(--honey-core)', letterSpacing: '0.1em' }}>
-          ✦ TU BRIEFING DE HOY
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--honey-core)', fontFamily: 'var(--font-body)' }}>
+          Lo que tengo para contarte
         </span>
-        <span style={{
-          background: 'rgba(201,148,26,0.12)', border: '1px solid rgba(201,148,26,0.25)',
-          borderRadius: 5, padding: '2px 8px',
-          fontSize: 9, fontWeight: 600, color: 'var(--honey-core)', fontFamily: 'var(--font-display)',
-        }}>
-          {escuchado ? 'VISTO' : 'NUEVO'}
-        </span>
+        {!escuchado && <span className="chip-state">Nuevo</span>}
       </div>
 
       {/* Body */}
@@ -170,17 +177,17 @@ function BriefingHeroCard({ onPlay, text }: { onPlay?: () => void; text: string 
 
       {/* Footer with restart button */}
       <div className="mt-2 flex items-center justify-between">
-        <p style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-body)' }}>
-          30 seg · Generado para hoy · Nova
+        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-body)' }}>
+          30 segundos · preparado esta mañana
         </p>
         {isPlaying && (
           <button
             onClick={handleRestart}
             className="flex items-center gap-1 transition-opacity hover:opacity-60"
-            style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'var(--font-display)' }}
+            style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-body)' }}
           >
             <RotateCcw size={10} />
-            REINICIAR
+            Reiniciar
           </button>
         )}
       </div>
@@ -245,70 +252,15 @@ function QuickDictationBar() {
       className="w-full flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-left transition-opacity hover:opacity-80"
       style={{ background: '#0D0B10', border: '1px solid rgba(255,255,255,0.06)' }}
     >
-      <Mic size={18} style={{ color: 'var(--violet-core)', flexShrink: 0 }} />
+      <Mic size={18} style={{ color: 'var(--memory-core)', flexShrink: 0 }} />
       <span className="flex-1" style={{ fontSize: 12.5, color: 'var(--text-muted)', fontFamily: 'var(--font-body)' }}>
-        Dictá algo rápido...
+        Contame algo — una tarea, un gasto, cómo venís...
       </span>
       <div className="flex items-center justify-center rounded-full"
         style={{ width: 30, height: 30, background: 'var(--honey-core)', flexShrink: 0 }}>
         <ArrowUp size={14} style={{ color: '#1A1206' }} />
       </div>
     </button>
-  );
-}
-
-// ── NoticiaCard ─────────────────────────────────────────────────────
-
-function NoticiaCard({ noticiasLeidas, marcarLeida }: { noticiasLeidas: string[]; marcarLeida: (id: string) => void }) {
-  const navigate = useNavigate();
-  const [noticia, setNoticia] = useState<any>(null);
-
-  useEffect(() => {
-    const cached = localStorage.getItem('domex_news_cache');
-    if (cached) {
-      try {
-        const { data } = JSON.parse(cached);
-        const noLeidas = data.filter((n: any) => !noticiasLeidas.includes(n.id));
-        setNoticia(noLeidas.length > 0 ? noLeidas[0] : data[0] || null);
-      } catch {}
-    }
-  }, []);
-
-  if (!noticia) return (
-    <div className="bm-card p-4 flex items-center gap-3">
-      <Newspaper size={13} className="text-white/15 shrink-0" />
-      <span className="sys-label flex-1">STREAM INTEL — SIN DATOS EN CACHÉ</span>
-      <button onClick={() => navigate('/intel')} className="sys-label hover:opacity-60" style={{ color: 'var(--color-accent)' }}>CARGAR →</button>
-    </div>
-  );
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-      className="bm-card p-4 space-y-3"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="live-dot" style={{ background: '#F59E0B', boxShadow: '0 0 6px #F59E0B' }} />
-          <span className="sys-label">STREAM INTEL</span>
-          {noticiasLeidas.includes(noticia.id) && <span className="sys-label opacity-50">[LEÍDA]</span>}
-        </div>
-        <button onClick={() => navigate('/intel')} className="sys-label hover:opacity-60 transition-opacity" style={{ color: 'var(--color-accent)' }}>
-          INTEL →
-        </button>
-      </div>
-      <p className="text-[13px] font-bold leading-snug line-clamp-2">{noticia.titulo}</p>
-      <div className="flex items-center justify-between">
-        <span className="sys-label">{noticia.fuente}</span>
-        <button
-          onClick={() => { marcarLeida(noticia.id); hablarTexto(`${noticia.titulo}. ${noticia.resumen || ''}`); }}
-          className="flex items-center gap-1.5 text-[8px] font-black tracking-widest uppercase px-3 py-1.5 rounded-lg border transition-all"
-          style={{ color: '#F59E0B', borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.08)' }}
-        >
-          ▶ AUDIO
-        </button>
-      </div>
-    </motion.div>
   );
 }
 
@@ -341,7 +293,7 @@ function GoldParticles() {
 
 export default function Dashboard() {
   const {
-    tareas, agenda, noticiasLeidas, marcarNoticiaLeida,
+    tareas, agenda, noticiasLeidas,
     alternarTarea, balanceCalculado, memoryEntries,
   } = useApp();
   const { profile } = useUserProfile();
@@ -428,10 +380,13 @@ export default function Dashboard() {
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: 4 }}>
               {formatEyebrow()}
             </p>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2 }}>
               {saludo()},<br />
               <span style={{ color: 'var(--honey-core)' }}>{nombre}</span>
             </h1>
+            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, fontWeight: 500, color: 'var(--text-tertiary)', marginTop: 4 }}>
+              {lineaDelDia()}
+            </p>
             {streak > 0 && (
               <div className="flex items-center gap-1 mt-1.5">
                 <Zap size={10} style={{ color: 'var(--honey-core)' }} />
@@ -470,8 +425,8 @@ export default function Dashboard() {
         {/* ── PRIORIDADES ── */}
         <section className="space-y-2">
           <div className="flex items-center justify-between px-0.5">
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.08em' }}>
-              LO QUE IMPORTA HOY
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+              Lo primero
             </span>
             {tareasFoco.length > 0 && (
               <span style={{ fontSize: 10, color: 'var(--violet-soft)', fontWeight: 500 }}>
@@ -553,9 +508,9 @@ export default function Dashboard() {
             <div className="flex flex-col items-center justify-center py-8 gap-3 rounded-2xl"
               style={{ background: '#0D0B10', border: '1px solid rgba(255,255,255,0.05)' }}>
               <Mic size={24} style={{ color: 'var(--violet-soft)' }} />
-              <p className="text-center" style={{ fontSize: 12, color: 'var(--text-tertiary)', fontFamily: 'var(--font-body)' }}>
-                Todavía no tenés prioridades para hoy.<br />
-                <span style={{ color: 'var(--honey-soft)' }}>Tocá el micrófono y contame qué está pasando.</span>
+              <p className="text-center" style={{ fontSize: 13, color: 'var(--text-tertiary)', fontFamily: 'var(--font-body)' }}>
+                Hoja en blanco.<br />
+                <span style={{ color: 'var(--honey-soft)' }}>Contame qué tenés en la cabeza y lo ordenamos juntos.</span>
               </p>
             </div>
           )}
@@ -567,20 +522,35 @@ export default function Dashboard() {
         {/* ── BARRA DE DICTADO RÁPIDO ── */}
         <QuickDictationBar />
 
-        {/* ── CAPITAL ── */}
-        {/* Mercado se saco de este lugar prominente (ver correccion de poda de vistas) — accesible solo via More */}
-        <div className="bm-card p-4">
-          <span className="sys-label block mb-2">CAPITAL</span>
-          <p className="text-[17px] font-black sys-value" style={{ color: balanceCalculado >= 0 ? 'white' : '#f87171' }}>
-            {new Intl.NumberFormat('es-AR', { style: 'currency', currency: profile.goals.moneda, maximumFractionDigits: 0 }).format(balanceCalculado)}
-          </p>
-          <button onClick={() => navigate('/capital')} className="sys-label mt-2 block hover:opacity-70 transition-opacity" style={{ color: 'var(--color-accent)' }}>
-            DETALLES →
-          </button>
-        </div>
+        {/* ── TU PLATA / TU CABEZA ── */}
+        {/* Mercado e Intel se sacaron de este lugar prominente — Mercado via More, Intel vive en MUNDO */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bm-card p-4">
+            <span className="sys-label block mb-2">Tu plata</span>
+            <p className="text-[17px] font-black sys-value" style={{ color: balanceCalculado >= 0 ? 'white' : '#f87171' }}>
+              {new Intl.NumberFormat('es-AR', { style: 'currency', currency: profile.goals.moneda, maximumFractionDigits: 0 }).format(balanceCalculado)}
+            </p>
+            <button onClick={() => navigate('/capital')} className="sys-label mt-2 block hover:opacity-70 transition-opacity" style={{ color: 'var(--color-accent)' }}>
+              ver el detalle
+            </button>
+          </div>
 
-        {/* ── INTEL STREAM ── */}
-        <NoticiaCard noticiasLeidas={noticiasLeidas} marcarLeida={marcarNoticiaLeida} />
+          {(() => {
+            const hoy = new Date().toISOString().split('T')[0];
+            const memHoy = memoryEntries.find(e => e.fecha === hoy);
+            return (
+              <button onClick={() => navigate('/conciencia/memoria')} className="bm-card p-4 text-left">
+                <span className="sys-label block mb-2">Tu cabeza</span>
+                <p className="text-[17px] font-black sys-value" style={{ color: memHoy ? 'white' : 'rgba(255,255,255,0.25)' }}>
+                  {memHoy ? `${memHoy.score}/10` : '—'}
+                </p>
+                <span className="sys-label mt-2 block" style={{ color: 'var(--memory-soft)' }}>
+                  {memHoy ? 'Check-in hoy ✓' : '¿Cómo estuvo el día? Contame en 10 seg.'}
+                </span>
+              </button>
+            );
+          })()}
+        </div>
 
         {/* ── PRÓXIMA REUNIÓN ── */}
         {proximaReunion ? (
@@ -591,17 +561,17 @@ export default function Dashboard() {
             className="bm-card p-4 flex items-center gap-4"
             style={enMenosde30min ? { borderColor: 'rgba(239,68,68,0.3)' } : {}}
           >
-            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', enMenosde30min ? 'bg-red-500/15' : 'bg-[var(--violet-ghost)]')}>
+            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', enMenosde30min ? 'bg-red-500/15' : 'bg-[var(--memory-ghost)]')}>
               <Calendar size={15} className={enMenosde30min ? 'text-red-400' : 'text-primary'} />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="sys-label block mb-0.5">{enMenosde30min ? '⚠ EN MENOS DE 30 MIN' : 'PRÓXIMA REUNIÓN'}</span>
+              {enMenosde30min && <span className="chip-state mb-0.5" style={{ '--chip-bg': 'var(--honey-ghost)', '--chip-color': 'var(--honey-soft)' } as React.CSSProperties}>30 min</span>}
+              <span className="sys-label block mb-0.5">{enMenosde30min ? 'Esto arranca en un rato' : 'Próxima reunión'}</span>
               <p className="text-[13px] font-bold leading-tight truncate">{proximaReunion.titulo}</p>
-              <p className="sys-label mt-0.5" style={{ letterSpacing: '0.15em' }}>
+              <p className="sys-label mt-0.5">
                 {proximaReunion.hora}{proximaReunion.personas.length > 0 && ` · ${proximaReunion.personas.join(', ')}`}
               </p>
             </div>
-            {enMenosde30min && <div className="live-dot live-dot-amber" />}
           </motion.div>
         ) : (
           <button
@@ -609,35 +579,15 @@ export default function Dashboard() {
             className="bm-card p-4 flex items-center gap-3 w-full text-left transition-opacity hover:opacity-80"
           >
             <Calendar size={14} className="text-white/15 shrink-0" />
-            <span className="sys-label flex-1">SIN REUNIONES PROGRAMADAS</span>
-            <span style={{ fontSize: 9, color: 'var(--honey-soft)', fontFamily: 'var(--font-display)', fontWeight: 700 }}>+ AGREGAR →</span>
+            <span className="sys-label flex-1">Agenda libre. Si surge algo, decímelo y lo anoto.</span>
           </button>
         )}
-
-        {/* ── MEMORIA ── */}
-        {/* Aprender/Nutricion/Energia se sacaron de este lugar prominente (poda de vistas) — solo via More */}
-        {(() => {
-          const hoy = new Date().toISOString().split('T')[0];
-          const memHoy = memoryEntries.find(e => e.fecha === hoy);
-          return (
-            <button onClick={() => navigate('/conciencia/memoria')}
-              className="bm-card p-3 text-left relative overflow-hidden"
-              style={{ '--bm-accent': '#8B5CF6' } as React.CSSProperties}>
-              <div className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r" style={{ background: '#8B5CF6' }} />
-              <Brain size={11} style={{ color: '#8B5CF6' }} className="mb-1.5 ml-1" />
-              <p className="text-[14px] font-black sys-value leading-none mb-0.5 ml-1"
-                style={{ color: memHoy ? 'white' : 'rgba(255,255,255,0.2)' }}>{memHoy ? `${memHoy.score}/10` : '—'}</p>
-              <span className="sys-label block ml-1" style={{ color: '#8B5CF6', opacity: 1 }}>MEMORIA</span>
-              <span className="sys-label block mt-0.5 ml-1">{memHoy ? 'Check-in hoy ✓' : 'Sin check-in'}</span>
-            </button>
-          );
-        })()}
 
         {/* ── EVOLUCIÓN ── */}
         <button onClick={() => setShowGraph(!showGraph)} className="w-full py-2.5 flex items-center justify-center gap-2 group">
           <div className="flex-1 h-px bg-white/5" />
           <span className="sys-label group-hover:text-white/40 transition-colors px-3">
-            {showGraph ? '▲' : '▼'} EVOLUCIÓN {Math.min(historial.length, 14)}D
+            {showGraph ? '▲' : '▼'} Cómo venís, últimas dos semanas
           </span>
           <div className="flex-1 h-px bg-white/5" />
         </button>
@@ -666,7 +616,7 @@ export default function Dashboard() {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="sys-label text-center py-4">DATOS INSUFICIENTES — CONTINÚA USANDO AICOLMENA</p>
+                <p className="sys-label text-center py-4">Dame unos días más y esto se llena solo.</p>
               )}
             </motion.div>
           )}
@@ -686,7 +636,7 @@ export default function Dashboard() {
                 className="w-full max-w-xs bm-card p-6 space-y-5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="sys-label">PERFORMANCE REPORT</span>
+                  <span className="sys-label">Tu día en números</span>
                   <button onClick={() => setShowScoreBreakdown(false)} className="text-white/20 hover:text-white transition-colors">
                     <X size={16} />
                   </button>
