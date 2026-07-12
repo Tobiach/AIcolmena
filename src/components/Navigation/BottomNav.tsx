@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { icon: User,      label: 'YO',       path: '/yo' },
 ];
 
-const CATEGORIA_TOAST: Record<string, { label: string; route: string }> = {
+const CATEGORIA_TOAST: Record<string, { label: React.ReactNode; route: string }> = {
   tarea:   { label: 'Tarea guardada',     route: '/tasks' },
   reunion: { label: 'Reunión agendada',   route: '/contexto' },
   gasto:   { label: 'Gasto registrado',   route: '/capital' },
@@ -30,7 +30,7 @@ const CATEGORIA_TOAST: Record<string, { label: string; route: string }> = {
   crm:     { label: 'Contacto guardado',  route: '/crm' },
 };
 
-function VoiceToast({ label, route, onClose }: { label: string; route: string; onClose: () => void }) {
+function VoiceToast({ label, route, onClose }: { label: React.ReactNode; route: string; onClose: () => void }) {
   const nav = useNavigate();
   return (
     <motion.div
@@ -39,31 +39,31 @@ function VoiceToast({ label, route, onClose }: { label: string; route: string; o
       exit={{ opacity: 0, y: 16 }}
       transition={{ duration: 0.2 }}
       className="fixed left-4 right-4 max-w-sm mx-auto z-50 flex items-center gap-3 px-4 py-3 rounded-xl"
-      style={{ bottom: 84, background: '#1A1A24', border: '1px solid rgba(201,148,26,0.3)' }}
+      style={{ bottom: 84, background: 'var(--bg-elevated)', border: '1px solid var(--honey-border)' }}
     >
       <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
-        style={{ background: 'rgba(201,148,26,0.12)' }}>
+        style={{ background: 'var(--honey-ghost)' }}>
         <CheckCircle size={13} style={{ color: 'var(--honey-core)' }} />
       </div>
-      <span className="flex-1 font-semibold" style={{ fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
+      <span className="flex-1 font-semibold" style={{ fontSize: 13, color: 'var(--text-primary)', fontFamily: 'var(--font-body)' }}>
         {label}
       </span>
       <button
         onClick={() => { onClose(); nav(route); }}
-        className="text-xs font-black shrink-0 transition-opacity hover:opacity-70"
-        style={{ color: 'var(--honey-bright)', fontSize: 11, fontFamily: 'var(--font-display)' }}
+        className="text-xs font-bold shrink-0 transition-opacity hover:opacity-70"
+        style={{ color: 'var(--honey-bright)', fontSize: 11, fontFamily: 'var(--font-body)' }}
       >
-        VER →
+        verlo
       </button>
     </motion.div>
   );
 }
 
 const ESTADO_LABEL: Record<string, string> = {
-  listening:  'ESCUCHANDO...',
-  processing: 'PROCESANDO...',
-  success:    'LISTO',
-  error:      'ERROR',
+  listening:  'Te escucho',
+  processing: 'Dame un segundo...',
+  success:    '',
+  error:      '',
 };
 
 const CATEGORIA_ICON: Record<string, string> = {
@@ -136,8 +136,8 @@ function VoiceFAB() {
   const isSuccess = estado === 'success';
   const isError = estado === 'error';
 
-  const [pendingToast, setPendingToast] = React.useState<{ label: string; route: string } | null>(null);
-  const [toast, setToast] = React.useState<{ label: string; route: string } | null>(null);
+  const [pendingToast, setPendingToast] = React.useState<{ label: React.ReactNode; route: string } | null>(null);
+  const [toast, setToast] = React.useState<{ label: React.ReactNode; route: string } | null>(null);
   const toastTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevEstado = React.useRef(estado);
   const [pendingSave, setPendingSave] = React.useState<typeof resultado | null>(null);
@@ -204,7 +204,15 @@ function VoiceFAB() {
       agregarContacto({ nombre: d.titulo ?? 'Contacto', empresa: d.empresa ?? '', estado: 'prospecto', valor: d.monto ?? 0 });
     }
     logEvent('voz_usado', res.categoria);
-    if (res.categoria && CATEGORIA_TOAST[res.categoria as keyof typeof CATEGORIA_TOAST]) {
+    if (res.categoria === 'gasto' || res.categoria === 'ingreso') {
+      const monto = d.monto as number;
+      setPendingToast({
+        label: (
+          <>Guardé <span className="hl-honey">${monto.toLocaleString('es-AR')}</span> en {res.categoria === 'gasto' ? 'gastos' : 'ingresos'}</>
+        ),
+        route: CATEGORIA_TOAST[res.categoria].route,
+      });
+    } else if (res.categoria && CATEGORIA_TOAST[res.categoria as keyof typeof CATEGORIA_TOAST]) {
       setPendingToast(CATEGORIA_TOAST[res.categoria as keyof typeof CATEGORIA_TOAST]);
     }
   }, [agregarTarea, agregarAgenda, agregarTransaccion, agregarIdea, agregarHabito, agregarContacto]);
@@ -345,16 +353,18 @@ function VoiceFAB() {
               </button>
             )}
 
-            {/* Estado label */}
-            <motion.p
-              key={estado}
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="sys-label mb-10"
-              style={{ color: isError ? 'var(--danger)' : 'var(--honey-soft)', letterSpacing: '0.2em' }}
-            >
-              {ESTADO_LABEL[estado] ?? ''}
-            </motion.p>
+            {/* Estado label — la voz de Colmena, Fraunces sentence case */}
+            {ESTADO_LABEL[estado] && (
+              <motion.p
+                key={estado}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-10"
+                style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 560, color: isError ? 'var(--danger)' : 'var(--honey-soft)' }}
+              >
+                {ESTADO_LABEL[estado]}
+              </motion.p>
+            )}
 
             {/* Mic ring / success / error */}
             {(isListening || isProcessing) && (
@@ -396,7 +406,7 @@ function VoiceFAB() {
               >
                 <p className="text-base font-medium leading-relaxed"
                   style={{ color: transcriptLive ? 'var(--text-primary)' : 'var(--text-tertiary)', fontFamily: 'var(--font-body)' }}>
-                  {transcriptLive || (isListening ? 'Hablá ahora...' : '')}
+                  {transcriptLive || (isListening ? 'Dale, contame.' : '')}
                 </p>
               </motion.div>
             )}
@@ -421,28 +431,25 @@ function VoiceFAB() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.25 }}
                     className="mt-4 rounded-2xl p-4 text-left"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(91,33,182,0.25)' }}
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--memory-border)' }}
                   >
-                    <p className="text-[13px] font-bold mb-0.5" style={{ color: 'var(--text-primary)' }}>
-                      No encontré una acción clara para eso.
-                    </p>
-                    <p className="text-[11px] mb-3" style={{ color: 'var(--text-tertiary)' }}>
-                      ¿Querías guardar esto como nota?
+                    <p className="text-[13px] font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+                      Entendí esto: "<span className="hl-memory">{pendingSave.datos?.titulo || pendingSave.datos?.contexto || 'lo que dijiste'}</span>". ¿Lo guardo como nota, así no se pierde?
                     </p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => { ejecutarGuardado({ ...pendingSave, categoria: 'nota' }); setPendingSave(null); dismissarExito(); }}
-                        className="flex-1 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
+                        className="flex-1 py-2.5 rounded-xl font-bold text-sm transition-all"
                         style={{ background: 'var(--honey-core)', color: 'var(--text-on-honey)' }}
                       >
-                        Guardar como nota
+                        Guardalo
                       </button>
                       <button
                         onClick={() => { setPendingSave(null); dismissarExito(); }}
-                        className="px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
+                        className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
                         style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--text-tertiary)', border: '1px solid rgba(255,255,255,0.08)' }}
                       >
-                        Descartar
+                        Dejá
                       </button>
                     </div>
                   </motion.div>
@@ -457,8 +464,8 @@ function VoiceFAB() {
                     className="mt-4 rounded-2xl p-4 text-left w-full"
                     style={{ background: 'var(--bg-elevated)', border: '1px solid var(--honey-border)' }}
                   >
-                    <p className="text-[12px] font-bold mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      ¿Cuánto fue? Ingresá el monto para guardarlo.
+                    <p className="text-[13px] font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
+                      ¿Cuánto fue?
                     </p>
                     <input
                       type="number"
@@ -518,7 +525,7 @@ function VoiceFAB() {
               >
                 <p className="text-sm leading-relaxed"
                   style={{ color: 'var(--text-secondary)' }}>
-                  {errorMsg || 'No se pudo procesar el comando.'}
+                  {errorMsg || 'No te llegué a entender. ¿Me lo repetís, o lo escribís?'}
                 </p>
                 <div className="flex gap-2 mt-4">
                   <button
@@ -526,14 +533,14 @@ function VoiceFAB() {
                     className="px-6 py-2.5 rounded-full text-sm font-semibold transition-all"
                     style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}
                   >
-                    Cerrar
+                    Repetir
                   </button>
                   <button
                     onClick={() => { cancelar(); setTextInputValue(''); setShowTextPanel(true); }}
                     className="px-6 py-2.5 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5"
-                    style={{ background: 'rgba(201,148,26,0.1)', color: 'var(--honey-bright)', border: '1px solid var(--honey-border)' }}
+                    style={{ background: 'var(--honey-ghost)', color: 'var(--honey-bright)', border: '1px solid var(--honey-border)' }}
                   >
-                    <Keyboard size={13} /> Escribir
+                    <Keyboard size={13} /> Escribirlo
                   </button>
                 </div>
               </motion.div>
@@ -541,9 +548,9 @@ function VoiceFAB() {
 
             {/* Hint */}
             {isListening && (
-              <p className="absolute bottom-32 sys-label text-center px-6"
-                style={{ color: 'rgba(255,255,255,0.15)', letterSpacing: '0.12em' }}>
-                DICTÁ UNA TAREA · GASTO · IDEA · REUNIÓN
+              <p className="absolute bottom-32 text-center px-6"
+                style={{ color: 'var(--text-tertiary)', fontSize: 12, fontFamily: 'var(--font-body)' }}>
+                Puede ser cualquier cosa: un gasto, una idea, algo que te pasó.
               </p>
             )}
             {/* Cancel button bottom-center */}
@@ -598,7 +605,7 @@ export function BottomNav() {
                 <motion.div animate={{ scale: isActive ? 1.2 : 1 }} transition={{ duration: 0.15 }}>
                   <item.icon size={18} style={{ color: isActive ? 'var(--honey-bright)' : 'var(--text-tertiary)' }} />
                 </motion.div>
-                <span style={{ fontSize: 8, letterSpacing: '0.05em', fontWeight: 700, color: isActive ? 'var(--honey-soft)' : 'var(--text-tertiary)' }}>
+                <span style={{ fontSize: 10, letterSpacing: '0.02em', fontWeight: 700, color: isActive ? 'var(--honey-soft)' : 'var(--text-tertiary)' }}>
                   {item.label}
                 </span>
               </div>
@@ -625,7 +632,7 @@ export function BottomNav() {
                 <motion.div animate={{ scale: isActive ? 1.2 : 1 }} transition={{ duration: 0.15 }}>
                   <item.icon size={18} style={{ color: isActive ? 'var(--honey-bright)' : 'var(--text-tertiary)' }} />
                 </motion.div>
-                <span style={{ fontSize: 8, letterSpacing: '0.05em', fontWeight: 700, color: isActive ? 'var(--honey-soft)' : 'var(--text-tertiary)' }}>
+                <span style={{ fontSize: 10, letterSpacing: '0.02em', fontWeight: 700, color: isActive ? 'var(--honey-soft)' : 'var(--text-tertiary)' }}>
                   {item.label}
                 </span>
               </div>

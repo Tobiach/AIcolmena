@@ -4,8 +4,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BottomNav } from '../Navigation/BottomNav';
 import { QuickActions } from '../Navigation/QuickActions';
 import { useUserProfile } from '../../hooks/useUserProfile';
-import FloatingMicButton from '../FloatingMicButton';
-import HiveBackground from '../HiveBackground';
 import BriefingMatutino, { useBriefing } from '../BriefingMatutino';
 import { AnimatePresence as AP } from 'motion/react';
 import AppTour, { TOUR_KEY } from '../AppTour';
@@ -17,9 +15,9 @@ import MiniAudioPlayer from '../MiniAudioPlayer';
 import CalendarModal from '../CalendarModal';
 
 const THEME_BG: Record<string, string> = {
-  dark:     '#120D04',
-  darker:   '#0D0802',
-  midnight: '#080610',
+  dark:     '#120E08',
+  darker:   '#0D0904',
+  midnight: '#0A0705',
   blackout: '#000000',
 };
 
@@ -31,7 +29,7 @@ export function MainLayout() {
   const [showTour, setShowTour] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const bgColor = THEME_BG[profile.visual?.theme ?? 'dark'] ?? '#06060E';
+  const bgColor = THEME_BG[profile.visual?.theme ?? 'dark'] ?? '#120E08';
   const notifEnabled = localStorage.getItem('domex_notif_enabled') === 'true';
   useAgendaNotifications(notifEnabled);
 
@@ -88,28 +86,21 @@ export function MainLayout() {
   }, [profile.onboardingCompleto, navigate]);
 
   return (
-    <div className="min-h-screen text-white pb-32 selection:bg-primary/30 grid-bg" style={{ backgroundColor: bgColor }}>
-      {/* Ambient bees */}
-      <HiveBackground />
-      {/* Moving scan beam */}
-      <div className="scan-beam" />
-
+    <div className="min-h-screen text-white pb-32 selection:bg-primary/30" style={{ backgroundColor: bgColor }}>
       <header className="max-w-lg mx-auto px-5 pt-10" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex justify-between items-center">
-          <Link to="/" className="group flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-            <div className="live-dot" />
-            <div>
-              <span className="text-[22px] font-black tracking-tighter leading-none glow-honey">AICOLMENA</span>
-              <span className="sys-label ml-2 align-middle" style={{ color: 'rgba(212,144,10,0.50)' }}>OS · ONLINE</span>
-            </div>
+          <Link to="/" className="hover:opacity-90 transition-opacity">
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 560, color: 'var(--text-primary)' }}>
+              colmena
+            </span>
           </Link>
           <Link to="/settings" className="relative group">
             <div
               className="w-10 h-10 flex items-center justify-center font-black text-xs transition-all"
               style={{
                 color: 'var(--color-accent)',
-                background: 'rgba(212,144,10,0.05)',
-                border: '1px solid rgba(212,144,10,0.18)',
+                background: 'var(--honey-ghost)',
+                border: '1px solid var(--honey-border)',
                 borderRadius: 4,
               }}
             >
@@ -122,11 +113,9 @@ export function MainLayout() {
             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#120D04] rounded-full" />
           </Link>
         </div>
-        {/* Status bar */}
         <div className="hud-sep mt-3" />
-        <div className="flex items-center justify-between mt-1.5">
-          <span className="sys-label" style={{ color: 'rgba(212,144,10,0.35)' }}>HIVE PROTOCOL v1.0 · ENCRYPTED</span>
-          <span className="sys-label" style={{ color: 'rgba(212,144,10,0.35)' }}>
+        <div className="flex items-center justify-end mt-1.5">
+          <span className="sys-label" style={{ color: 'var(--text-tertiary)' }}>
             {new Date().toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase()}
           </span>
         </div>
