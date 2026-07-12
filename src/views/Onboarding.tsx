@@ -14,20 +14,12 @@ const ROLES: Role[] = ['Founder', 'Freelancer', 'Profesional', 'Emprendedor', 'O
 const WAKE_TIMES = ['5:00', '5:30', '6:00', '6:30', '7:00', '7:30', '8:00', '9:00', '10:00'];
 
 const PAIN_OPTIONS: { id: Pain; label: string; icon: string }[] = [
-  { id: 'seguimientos', label: 'Olvidar seguimientos importantes', icon: '🔔' },
-  { id: 'foco',         label: 'Perder el foco durante el día',    icon: '🎯' },
-  { id: 'priorizar',    label: 'No saber qué priorizar primero',   icon: '⚖️' },
-  { id: 'balance',      label: 'Separar trabajo y vida personal',  icon: '⚡' },
-  { id: 'finanzas',     label: 'Mantener mis finanzas claras',     icon: '💰' },
+  { id: 'seguimientos', label: 'Me olvido de responder y hacer seguimientos', icon: '🔔' },
+  { id: 'foco',         label: 'Se me va el día y no sé en qué',             icon: '🎯' },
+  { id: 'priorizar',    label: 'Todo parece urgente al mismo tiempo',        icon: '⚖️' },
+  { id: 'balance',      label: 'El trabajo se me come la vida',              icon: '⚡' },
+  { id: 'finanzas',     label: 'No sé bien en qué se me va la plata',        icon: '💰' },
 ];
-
-const PAIN_LABELS: Record<Pain, string> = {
-  seguimientos: 'perder seguimientos',
-  foco:         'perder el foco',
-  priorizar:    'no saber qué priorizar',
-  balance:      'separar trabajo y vida',
-  finanzas:     'no tener claridad financiera',
-};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function clearUserData() {
@@ -36,13 +28,12 @@ function clearUserData() {
   });
 }
 
-function buildWelcomeBriefing(nombre: string, role: Role, pain: Pain): string {
+function buildWelcomeBriefing(nombre: string): string {
   return (
-    `Bienvenido, ${nombre}. ` +
-    `Como ${role.toLowerCase()}, tu mayor desafío es ${PAIN_LABELS[pain]}. ` +
-    `AIcolmena va a darte un briefing de 30 segundos cada mañana ` +
-    `para que sepas exactamente qué necesita tu atención. ` +
-    `Sin distracciones. Sin ruido. Solo lo que importa. ` +
+    `Hola, ${nombre}. Soy Colmena. ` +
+    `Cada mañana te voy a esperar con un resumen de 30 segundos de tu día. ` +
+    `Y a medida que me cuentes cosas — qué hiciste, con quién, cómo venís — ` +
+    `voy a empezar a acordarme por vos. Todo queda en tu teléfono. ` +
     `¿Arrancamos?`
   );
 }
@@ -126,10 +117,10 @@ function useKaraoke(text: string, autoPlay: boolean) {
 }
 
 // ─── Pantalla 3 — AHA MOMENT ──────────────────────────────────────────────────
-function StepBriefing({ nombre, role, pain, onEnter }: {
+function StepBriefing({ nombre, onEnter }: {
   nombre: string; role: Role; pain: Pain; onEnter: () => void;
 }) {
-  const text = buildWelcomeBriefing(nombre, role, pain);
+  const text = buildWelcomeBriefing(nombre);
   const { words, wordIdx, playing, done, play } = useKaraoke(text, true);
 
   return (
@@ -141,7 +132,7 @@ function StepBriefing({ nombre, role, pain, onEnter }: {
           className="sys-label mb-2"
           style={{ color: 'var(--honey-soft)', letterSpacing: '0.2em' }}
         >
-          TU PRIMER BRIEFING
+          Esto es Colmena
         </motion.p>
         <h1 className="text-2xl font-black tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
           {done ? '¡Listo!' : playing ? 'Escuchá...' : 'Generando...'}
@@ -212,7 +203,7 @@ function StepBriefing({ nombre, role, pain, onEnter }: {
             className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm tracking-wider transition-all active:scale-[0.98]"
             style={{ background: 'var(--honey-core)', color: 'var(--text-on-honey)', boxShadow: 'var(--glow-honey)' }}
           >
-            Entrar a AIcolmena <ChevronRight size={16} strokeWidth={2.5} />
+            Arranquemos <ChevronRight size={16} strokeWidth={2.5} />
           </motion.button>
         )}
       </AnimatePresence>
@@ -262,8 +253,6 @@ export default function Onboarding() {
 
   return (
     <div className="fixed inset-0 text-white z-[200] overflow-y-auto" style={{ background: 'var(--bg-primary)' }}>
-      <div className="scan-beam" />
-
       {/* Progress bar */}
       <div className="fixed top-0 left-0 w-full h-[3px] z-[210]" style={{ background: 'var(--border-subtle)' }}>
         <motion.div
@@ -279,11 +268,10 @@ export default function Onboarding() {
 
           {/* Logo */}
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 mb-1">
-              <div className="live-dot" />
-              <span className="text-xl font-black tracking-tighter" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>AICOLMENA</span>
-            </div>
-            <p className="sys-label" style={{ color: 'var(--honey-soft)', opacity: 0.5 }}>PASO {step} DE 3</p>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 560, color: 'var(--text-primary)' }}>
+              colmena
+            </span>
+            <p className="sys-label mt-1" style={{ color: 'var(--honey-soft)' }}>Paso {step} de 3</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -298,8 +286,8 @@ export default function Onboarding() {
               {step === 1 && (
                 <div className="space-y-5">
                   <div>
-                    <h1 className="text-3xl font-black tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)' }}>¿Quién sos?</h1>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Personalizamos tu experiencia desde el primer día.</p>
+                    <h1 className="text-3xl tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', fontWeight: 560 }}>Empecemos por vos</h1>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Con esto te saludo como corresponde.</p>
                   </div>
 
                   {/* Nombre */}
@@ -320,7 +308,7 @@ export default function Onboarding() {
 
                   {/* Rol */}
                   <div>
-                    <p className="sys-label mb-2">¿QUÉ HACÉS?</p>
+                    <p className="sys-label mb-2">¿En qué andás?</p>
                     <div className="flex flex-wrap gap-2">
                       {ROLES.map(r => (
                         <button
@@ -341,7 +329,7 @@ export default function Onboarding() {
 
                   {/* Hora despertar */}
                   <div>
-                    <p className="sys-label mb-2">¿A QUÉ HORA TE LEVANTÁS?</p>
+                    <p className="sys-label mb-2">¿A qué hora arranca tu día?</p>
                     <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
                       {WAKE_TIMES.map(t => (
                         <button
@@ -362,7 +350,7 @@ export default function Onboarding() {
 
                   {/* Email opcional */}
                   <div>
-                    <p className="sys-label mb-2" style={{ opacity: 0.5 }}>EMAIL (OPCIONAL — PARA ACCEDER DESDE OTRO DISPOSITIVO)</p>
+                    <p className="sys-label mb-2" style={{ opacity: 0.7 }}>Email (opcional) — solo para entrar desde otro teléfono. No mandamos nada.</p>
                     <input
                       type="email"
                       value={email}
@@ -383,8 +371,8 @@ export default function Onboarding() {
               {step === 2 && (
                 <div className="space-y-5">
                   <div>
-                    <h1 className="text-3xl font-black tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)' }}>¿Qué es lo que más te cuesta manejar?</h1>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Solo una opción. Sé honesto — AIcolmena prioriza en base a esto.</p>
+                    <h1 className="text-3xl tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', fontWeight: 560 }}>¿Qué se te escapa más seguido?</h1>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Una sola. La real.</p>
                   </div>
                   <div className="space-y-2">
                     {PAIN_OPTIONS.map(opt => (
@@ -434,25 +422,25 @@ export default function Onboarding() {
                   className="flex items-center gap-1.5 px-5 py-3.5 rounded-xl font-black text-[10px] tracking-widest transition-all"
                   style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)' }}
                 >
-                  <ChevronLeft size={14} /> ATRÁS
+                  <ChevronLeft size={14} /> Atrás
                 </button>
               )}
               <button
                 onClick={handleNext}
                 disabled={!canNext}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl font-black text-[11px] tracking-widest transition-all active:scale-[0.98]"
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-[0.98]"
                 style={canNext
                   ? { background: 'var(--honey-core)', color: 'var(--text-on-honey)', boxShadow: 'var(--glow-honey)' }
                   : { background: 'var(--bg-surface)', color: 'var(--text-tertiary)', cursor: 'not-allowed', border: '1px solid var(--border-subtle)' }
                 }
               >
-                SIGUIENTE <ChevronRight size={14} strokeWidth={2.5} />
+                Siguiente <ChevronRight size={14} strokeWidth={2.5} />
               </button>
             </div>
           )}
 
-          <p className="text-[9px] text-center tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
-            DATOS PRIVADOS · SOLO EN TU DISPOSITIVO
+          <p className="text-xs text-center" style={{ color: 'var(--text-tertiary)' }}>
+            Todo esto vive en tu teléfono. No lo vemos ni nosotros.
           </p>
         </div>
       </div>
