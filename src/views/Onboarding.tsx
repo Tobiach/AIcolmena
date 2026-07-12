@@ -175,7 +175,7 @@ function StepBriefing({ nombre, onEnter }: {
             <span
               key={i}
               style={{
-                color: i === wordIdx ? 'var(--honey-bright)' : done ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+                color: i === wordIdx ? 'var(--honey-bright)' : 'var(--text-secondary)',
                 fontWeight: i === wordIdx ? 700 : 400,
                 transition: 'color 0.1s, font-weight 0.1s',
                 marginRight: 4,
