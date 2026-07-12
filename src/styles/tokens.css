@@ -1,62 +1,73 @@
 /* ═══════════════════════════════════════════════════════
-   AICOLMENA — DESIGN TOKENS v2
-   Paleta "Miel Fundida" — regla 80/15/5
+   AICOLMENA — DESIGN TOKENS v3
+   Paleta "Panal de Noche" — regla 80/12/8 (base cálida / miel-acción / lavanda-memoria)
    TODO el código consume de acá. Prohibido hardcodear colores.
 ═══════════════════════════════════════════════════════ */
 
 :root {
-  /* ── 80% EL ESPACIO ── */
-  --bg-primary:      #0A0A0F;
-  --bg-surface:      #12121A;
-  --bg-surface-warm: #0F0D08;
-  --bg-elevated:     #1A1A24;
-  --border-subtle: rgba(255,255,255,0.06);
-  --border-default:rgba(255,255,255,0.10);
+  /* ── 80% BASE — noche cálida ── */
+  --bg-primary:      #120E08;
+  --bg-surface:      #1A140C;
+  --bg-surface-warm: #241C11;
+  --bg-elevated:     #241C11;
+  --border-subtle:  rgba(240,220,180,0.07);
+  --border-default: rgba(240,220,180,0.12);
 
-  /* ── 15% EL MOTOR (violeta — estructura, navegación) ── */
-  --violet-core:   #5B21B6;
-  --violet-bright: #7C3AED;
-  --violet-soft:   #A78BFA;
-  --violet-ghost:  rgba(91,33,182,0.12);
-
-  /* ── 5% LA SEÑAL (miel fundida — solo lo que requiere atención) ── */
+  /* ── MIEL — el mundo de la acción (tareas, plata, botones, voz) ── */
   --honey-core:    #C9941A;
   --honey-bright:  #F0B429;
   --honey-soft:    #F5D77E;
   --honey-glow:    rgba(201,148,26,0.15);
-  --honey-border:  rgba(201,148,26,0.3);
-  --honey-bg-warm: #0F0D08;
+  --honey-ghost:   rgba(201,148,26,0.13);
+  --honey-border:  rgba(201,148,26,0.28);
+  --honey-bg-warm: #241C11;
+
+  /* ── LAVANDA — el mundo de la memoria (motor de correlación, personas, hipótesis) ── */
+  --memory-core:   #8B7BC7;
+  --memory-bright: #B4A5E8;
+  --memory-soft:   #CFC5F0;
+  --memory-ghost:  rgba(139,123,199,0.13);
+  --memory-border: rgba(139,123,199,0.28);
+
+  /* ── ALIASES violet-* → memory-* (compat: no romper 30+ archivos existentes) ── */
+  --violet-core:   var(--memory-core);
+  --violet-bright: var(--memory-bright);
+  --violet-soft:   var(--memory-soft);
+  --violet-ghost:  var(--memory-ghost);
 
   /* ── COMPLEMENTARIOS ── */
   --amber-deep:    #92670F;
-  --cream:         #FBF3E4;
-  --success:       #34D399;
-  --danger:        #F87171;
-  --info:          #60A5FA;
+  --cream:         #F5EFE3;
+  --success:       #7FC9A2;
+  --danger:        #E8837B;
+  --info:          #8FB8DE;
   --teal:          #5EEAD4;
 
-  /* ── TEXTO ── */
-  --text-primary:   #F9FAFB;
-  --text-secondary: #9CA3AF;
-  --text-tertiary:  #6B7280;
-  --text-muted:     #374151;
+  /* ── TEXTO — crema, no gris azulado ── */
+  --text-primary:   #F5EFE3;
+  --text-secondary: #B3A891;
+  --text-tertiary:  #7D7259;
+  --text-muted:     #4A4432;
   --text-on-honey:  #1A1206;
+  --text-on-memory: #14101F;
 
   /* ── TIPOGRAFÍA ── */
-  --font-display: 'Space Grotesk', sans-serif;
+  /* Fraunces = la voz de Colmena (títulos, briefing, hipótesis). Inter = interfaz y datos. */
+  --font-display: 'Fraunces', serif;
   --font-body:    'Inter', sans-serif;
 
-  /* ── ESCALA TIPOGRÁFICA ── */
+  /* ── ESCALA TIPOGRÁFICA — piso 11px, nada por debajo ── */
+  --text-2xs:  11px;
   --text-xs:   12px;
   --text-sm:   14px;
   --text-base: 16px;
-  --text-lg:   18px;
-  --text-xl:   22px;
-  --text-2xl:  28px;
+  --text-lg:   19px;
+  --text-xl:   24px;
+  --text-2xl:  30px;
   --text-3xl:  36px;
   --lh-body:   1.5;
   --lh-title:  1.2;
-  --ls-title:  -0.02em;
+  --ls-title:  -0.01em;
 
   /* ── ESPACIADO (grid 4px) ── */
   --space-1:  4px;
@@ -68,24 +79,25 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ── RADIOS ── */
-  --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   16px;
+  /* ── RADIOS — esquinas más redondas, menos "máquina" ── */
+  --radius-sm:   10px;
+  --radius-md:   14px;
+  --radius-lg:   18px;
+  --radius-xl:   20px;
   --radius-full: 9999px;
 
-  /* ── SOMBRAS / GLOWS ── */
-  --glow-violet: 0 0 24px rgba(91,33,182,0.25);
+  /* ── SOMBRAS / GLOWS — un solo elemento con permiso de brillar: el FAB de voz ── */
   --glow-honey:  0 0 32px rgba(201,148,26,0.30);
+  --glow-violet: 0 0 20px rgba(139,123,199,0.20);
 
-  /* ── ANIMACIONES ── */
+  /* ── ANIMACIONES — solo responden al usuario o a la voz, nunca loops decorativos ── */
   --duration-fast:   150ms;
   --duration-base:   200ms;
   --ease-out:        cubic-bezier(0.0, 0.0, 0.2, 1);
 
   /* ── BACKWARD COMPAT (aliases para código legado) ── */
   --accent-main:      var(--honey-core);
-  --accent-secondary: var(--violet-soft);
+  --accent-secondary: var(--memory-soft);
   --color-accent:     var(--honey-core);
-  --color-primary:    var(--violet-core);
+  --color-primary:    var(--memory-core);
 }

@@ -3,7 +3,7 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-display: "Fraunces", serif;
   --font-mono: "JetBrains Mono", "Courier New", monospace;
   --color-accent:        var(--honey-core);
   --color-primary:       var(--violet-core);
@@ -43,30 +43,6 @@
   border-radius: var(--radius-md);
   overflow: hidden;
 }
-.bm-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 14px; height: 14px;
-  border-top: 1.5px solid var(--honey-core);
-  border-left: 1.5px solid var(--honey-core);
-  border-radius: var(--radius-md) 0 0 0;
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: 1;
-}
-.bm-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 14px; height: 14px;
-  border-bottom: 1.5px solid var(--honey-core);
-  border-right: 1.5px solid var(--honey-core);
-  border-radius: 0 0 var(--radius-md) 0;
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: 1;
-}
 
 /* ── SYSTEM LABELS ── */
 .sys-label {
@@ -101,46 +77,6 @@
   50%      { opacity: 0.4; transform: scale(0.75); }
 }
 
-/* ── SCAN LINE static ── */
-.scanline::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0px,
-    transparent 3px,
-    rgba(212,144,10,0.012) 3px,
-    rgba(212,144,10,0.012) 4px
-  );
-  pointer-events: none;
-  z-index: 0;
-  border-radius: inherit;
-}
-
-/* ── MOVING SCAN BEAM ── */
-@keyframes scan-move {
-  0%   { top: -1px; opacity: 0; }
-  5%   { opacity: 1; }
-  95%  { opacity: 0.6; }
-  100% { top: 100vh; opacity: 0; }
-}
-.scan-beam {
-  position: fixed;
-  left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(212,144,10,0.3) 40%, rgba(212,144,10,0.3) 60%, transparent 100%);
-  animation: scan-move 12s linear infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* ── HEX GRID BG (colmena) ── */
-.grid-bg {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='48'%3E%3Cpath d='M28 1 L55 15 L55 33 L28 47 L1 33 L1 15 Z' fill='none' stroke='rgba(212%2C144%2C10%2C0.05)' stroke-width='0.8'/%3E%3C/svg%3E");
-  background-size: 56px 48px;
-}
-
 /* ── ARC REACTOR ANIMATIONS ── */
 @keyframes arc-spin {
   from { transform: rotate(0deg); }
@@ -166,13 +102,8 @@
   text-shadow: 0 0 10px rgba(201,148,26,0.8), 0 0 28px var(--honey-glow);
 }
 .glow-violet {
-  color: var(--violet-soft);
-  text-shadow: 0 0 10px rgba(91,33,182,0.6), 0 0 24px rgba(91,33,182,0.25);
-}
-/* mantener glow-cyan para backward compat */
-.glow-cyan {
-  color: var(--info);
-  text-shadow: 0 0 10px rgba(96,165,250,0.6), 0 0 24px rgba(96,165,250,0.25);
+  color: var(--memory-soft);
+  text-shadow: 0 0 10px rgba(139,123,199,0.5), 0 0 24px rgba(139,123,199,0.2);
 }
 
 /* ── HUD BUTTON ── */
@@ -295,14 +226,97 @@
   font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
-  background: var(--violet-ghost);
-  color: var(--violet-soft);
-  border: 1px solid rgba(91,33,182,0.20);
+  background: var(--memory-ghost);
+  color: var(--memory-soft);
+  border: 1px solid var(--memory-border);
 }
 .chip-honey {
   background: var(--honey-glow);
   color: var(--honey-soft);
   border-color: rgba(201,148,26,0.25);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANAL DE NOCHE — highlights y chips del motor de contexto
+   Ver documento de diseño §5. Reglas: máx 3 highlights por bloque
+   de texto, nunca adyacentes, nunca sobre estado emocional, nunca
+   dentro de botones ni en Settings/errores/legal.
+═══════════════════════════════════════════════════════ */
+
+/* ── 5.1 Highlight inline — dato duro (miel) vs memoria (lavanda) ── */
+.hl-honey,
+.hl-memory {
+  padding: 1px 7px;
+  border-radius: 7px;
+  font-weight: 600;
+  font-size: inherit;
+  white-space: nowrap;
+}
+.hl-honey {
+  background: var(--honey-ghost);
+  color: var(--honey-soft);
+}
+.hl-memory {
+  background: var(--memory-ghost);
+  color: var(--memory-soft);
+}
+
+/* ── 5.2 Chip de estado — NUEVO / HOY / URGENTE, máx uno por card ── */
+.chip-state {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 7px;
+  font-family: var(--font-body);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--chip-bg, var(--honey-ghost));
+  color: var(--chip-color, var(--honey-soft));
+}
+
+/* ── 5.3 Chip de persona — siempre lavanda, motor relacional ── */
+.chip-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
+  border-radius: var(--radius-full);
+  background: var(--memory-ghost);
+  border: 1px solid var(--memory-border);
+  color: var(--memory-soft);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.chip-person-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--memory-core);
+  color: var(--text-on-memory);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── 5.4 Chip de pregunta — encabeza toda card de hipótesis del motor ── */
+.chip-question {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: var(--memory-ghost);
+  color: var(--memory-soft);
+  font-family: var(--font-body);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ── MARKDOWN ── */
