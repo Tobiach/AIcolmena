@@ -451,8 +451,7 @@ export default function Capital() {
               <p className="text-3xl">💸</p>
               <p className="font-bold text-sm" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Sin movimientos todavía</p>
               <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                Usá la voz: <span style={{ color: 'var(--honey-bright)' }}>"Gasté 5000 en marketing"</span>
-                <br />o tocá los botones de arriba.
+                Contame un gasto o un ingreso y empiezo a llevar la cuenta.
               </p>
             </div>
           ) : transacciones.map((t) => (

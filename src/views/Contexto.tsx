@@ -8,10 +8,10 @@ const Capital = lazy(() => import('./Capital'));
 const CRM     = lazy(() => import('./CRM'));
 
 const TABS = [
-  { key: 'tareas',   label: 'Tareas',   icon: CheckSquare },
-  { key: 'ideas',    label: 'Ideas',    icon: Lightbulb },
-  { key: 'finanzas', label: 'Finanzas', icon: DollarSign },
-  { key: 'personas', label: 'Personas', icon: Users },
+  { key: 'tareas',   label: 'Tareas', icon: CheckSquare },
+  { key: 'ideas',    label: 'Ideas',  icon: Lightbulb },
+  { key: 'finanzas', label: 'Plata',  icon: DollarSign },
+  { key: 'personas', label: 'Gente',  icon: Users },
 ] as const;
 
 type Tab = typeof TABS[number]['key'];
@@ -27,6 +27,10 @@ export default function Contexto() {
 
   return (
     <div className="flex flex-col gap-4">
+      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, fontWeight: 500, color: 'var(--text-tertiary)' }}>
+        Todo lo que me fuiste contando, ordenado.
+      </p>
+
       {/* Tab bar interno */}
       <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-surface)' }}>
         {TABS.map(({ key, label, icon: Icon }) => {
@@ -35,18 +39,18 @@ export default function Contexto() {
             <button
               key={key}
               onClick={() => setTab(key)}
-              className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg transition-all"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg transition-all"
               style={{
-                background: active ? 'var(--violet-ghost)' : 'transparent',
+                background: active ? 'var(--memory-ghost)' : 'transparent',
                 borderBottom: active ? '2px solid var(--honey-core)' : '2px solid transparent',
               }}
             >
-              <Icon size={16} style={{ color: active ? 'var(--honey-bright)' : 'var(--text-tertiary)' }} />
+              <Icon size={15} style={{ color: active ? 'var(--honey-bright)' : 'var(--text-tertiary)' }} />
               <span style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '0.06em',
+                fontSize: 13, fontWeight: 600,
                 color: active ? 'var(--text-primary)' : 'var(--text-tertiary)',
               }}>
-                {label.toUpperCase()}
+                {label}
               </span>
             </button>
           );

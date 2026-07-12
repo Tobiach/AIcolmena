@@ -75,11 +75,10 @@ export default function Ideas() {
         <div className="bm-card p-8 text-center space-y-2">
           <p className="text-3xl">💡</p>
           <p className="font-bold text-base" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
-            Tu laboratorio de ideas está vacío
+            Nada por acá todavía
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Tocá el micrófono y decí<br />
-            <span style={{ color: 'var(--honey-bright)' }}>"Idea: app para gestionar turnos en peluquerías"</span>
+            Las ideas que me dictes viven acá. Ninguna se pierde.
           </p>
         </div>
       )}

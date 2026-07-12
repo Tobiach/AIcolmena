@@ -149,9 +149,9 @@ export default function CRM() {
       {contactos.length === 0 && (
         <div className="bm-card p-8 text-center space-y-2">
           <p className="text-3xl">👤</p>
-          <p className="font-bold text-sm" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Nadie en el pipeline todavía</p>
+          <p className="font-bold text-sm" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Nadie por acá todavía</p>
           <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Usá la voz: <span style={{ color: 'var(--honey-bright)' }}>"Contacto: Martín García de Empresa X, prospecto $500"</span>
+            Acá va la gente con la que trabajás y la que te importa.
           </p>
         </div>
       )}

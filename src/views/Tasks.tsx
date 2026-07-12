@@ -222,8 +222,7 @@ export default function Tasks() {
             Todo despejado
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Todavía no guardaste tareas. Tocá el micrófono y decí<br />
-            <span style={{ color: 'var(--honey-bright)' }}>"Tarea: llamar a Juan mañana"</span>
+            Nada pendiente por acá. Cuando surja algo, decímelo.
           </p>
         </div>
       )}
