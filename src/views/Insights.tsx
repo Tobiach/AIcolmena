@@ -1,11 +1,108 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useStreaks, getDailyScores } from '../hooks/useStreaks';
 import { TrendingUp, TrendingDown, Flame, CheckSquare, Lightbulb, Users, BarChart2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, LineChart, Line, Cell } from 'recharts';
+import { obtenerCheckInRelacionalDelDia, type MotorCorrelacionResult } from '../services/optimizacionService';
 
 type Periodo = '7d' | '30d' | 'todo';
+
+// ── HypothesisCard ─────────────────────────────────────────────────
+// El momento diferenciador del producto: la hipótesis del motor de
+// correlación relacional/emocional, SIEMPRE como pregunta abierta.
+// Consume la forma real de obtenerCheckInRelacionalDelDia() (no la
+// narrativa con highlights inline que imaginó el doc de diseño — esa
+// forma no existe en los datos reales, así que el componente se adapta).
+function HypothesisCard() {
+  const { personasImportantes, energyEntries, hormoneEntries, memoryEntries } = useApp();
+  const [resultado, setResultado] = useState<MotorCorrelacionResult | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [respuesta, setRespuesta] = useState<'puede_ser' | 'no_va' | null>(null);
+
+  useEffect(() => {
+    obtenerCheckInRelacionalDelDia({ personas: personasImportantes, energyEntries, hormoneEntries, memoryEntries })
+      .then(setResultado)
+      .catch(() => setResultado({ crisis: false, correlaciones: [] }))
+      .finally(() => setCargando(false));
+  }, []);
+
+  if (cargando) {
+    return <div className="bm-card p-4 h-24 skeleton" />;
+  }
+
+  if (resultado?.crisis && resultado.recurso) {
+    return (
+      <div className="bm-card p-4" style={{ border: '1px solid var(--memory-border)' }}>
+        <span className="chip-question">Colmena se pregunta</span>
+        <p className="mt-3 text-[13px] leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+          Si necesitás hablar con alguien ahora: <span className="hl-memory">{resultado.recurso.nombre}</span>, {resultado.recurso.telefono}.
+        </p>
+      </div>
+    );
+  }
+
+  const correlacion = resultado?.correlaciones[0];
+
+  return (
+    <div className="bm-card p-4" style={{ border: '1px solid var(--memory-border)' }}>
+      <span className="chip-question">Colmena se pregunta</span>
+
+      {!correlacion ? (
+        <p className="mt-3 text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          Todavía no te conozco lo suficiente. Dame unos días de charla y acá te empiezo a mostrar lo que veo.
+        </p>
+      ) : (
+        <>
+          <p className="mt-3" style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 560, lineHeight: 1.4, color: 'var(--text-primary)' }}>
+            {correlacion.pregunta}
+          </p>
+
+          {(correlacion.persona || correlacion.evidencia.length > 0) && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {correlacion.persona && (
+                <span className="chip-person">
+                  <span className="chip-person-avatar">{correlacion.persona.charAt(0).toUpperCase()}</span>
+                  {correlacion.persona}
+                </span>
+              )}
+              {correlacion.evidencia.map((e, i) => (
+                <span key={i} className="hl-memory">{e}</span>
+              ))}
+            </div>
+          )}
+
+          {respuesta ? (
+            <p className="mt-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
+              {respuesta === 'puede_ser' ? 'Gracias, lo voy a seguir mirando.' : 'Anotado — no es eso.'}
+            </p>
+          ) : (
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setRespuesta('puede_ser')}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: 'var(--memory-ghost)', color: 'var(--memory-soft)', border: '1px solid var(--memory-border)' }}
+              >
+                Puede ser
+              </button>
+              <button
+                onClick={() => setRespuesta('no_va')}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-default)' }}
+              >
+                No va por ahí
+              </button>
+            </div>
+          )}
+
+          <p className="mt-3 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+            Es una pregunta, no una conclusión. Vos tenés la última palabra.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function Insights() {
   const { tareas, ideas, transacciones, habitos } = useApp();
@@ -59,19 +156,21 @@ export default function Insights() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
-            Insights
+            Patrones
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>Tu progreso de un vistazo</p>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>Lo que voy viendo con el tiempo</p>
         </div>
         <BarChart2 size={20} style={{ color: 'var(--honey-core)' }} />
       </div>
 
+      <HypothesisCard />
+
       {!hasData ? (
         <div className="bm-card p-8 text-center">
           <p className="text-4xl mb-3">📊</p>
-          <p className="font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Todavía no hay datos</p>
+          <p className="font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Todavía no te conozco lo suficiente</p>
           <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-            Usá la voz para dictar tareas, gastos e ideas. Acá vas a ver tus patrones.
+            Dame unos días de charla y acá te empiezo a mostrar lo que veo.
           </p>
         </div>
       ) : (
@@ -110,7 +209,7 @@ export default function Insights() {
           {/* Finanzas */}
           <div className="bm-card p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="sys-label" style={{ color: 'var(--violet-soft)' }}>FINANZAS</p>
+              <p className="sys-label" style={{ color: 'var(--memory-soft)' }}>Entró y salió</p>
               <div className="flex gap-1">
                 {(['7d', '30d', 'todo'] as Periodo[]).map(p => (
                   <button
@@ -165,13 +264,13 @@ export default function Insights() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="sys-label text-center py-2" style={{ color: 'var(--text-tertiary)' }}>SIN MOVIMIENTOS EN EL PERÍODO</p>
+              <p className="sys-label text-center py-2" style={{ color: 'var(--text-tertiary)' }}>Semana quieta en la plata.</p>
             )}
           </div>
 
           {/* Links profundos */}
           <div className="bm-card p-4">
-            <p className="sys-label mb-3" style={{ color: 'var(--violet-soft)' }}>MÁS PROFUNDO</p>
+            <p className="sys-label mb-3" style={{ color: 'var(--memory-soft)' }}>Para escarbar más</p>
             <div className="space-y-1.5">
               {/* Conciencia se saco de este lugar prominente (poda de vistas) — solo via More */}
               {[

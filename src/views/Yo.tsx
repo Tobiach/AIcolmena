@@ -18,11 +18,11 @@ function QueSabeColmena({ personas, actualizarPersona, eliminarPersona }: {
   const [editId, setEditId] = useState<string | null>(null);
 
   return (
-    <div className="bm-card p-4 space-y-3">
-      <p className="sys-label" style={{ color: 'var(--violet-soft)' }}>QUÉ SABE COLMENA DE MÍ</p>
+    <div className="bm-card p-4 space-y-3" style={{ border: '1px solid var(--memory-border)' }}>
+      <p className="sys-label" style={{ color: 'var(--memory-soft)' }}>Lo que sé de vos</p>
       {personas.length === 0 ? (
         <p className="text-xs leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
-          Todavía no registraste personas importantes. Van a aparecer acá a medida que las menciones.
+          Cuando me cuentes de la gente que te importa, va a ir apareciendo acá. Todo se puede corregir o borrar — es tuyo.
         </p>
       ) : (
         <div className="space-y-2">
@@ -51,14 +51,14 @@ function QueSabeColmena({ personas, actualizarPersona, eliminarPersona }: {
                       className="flex-1 py-2 rounded-lg text-xs font-bold"
                       style={{ background: 'var(--honey-core)', color: 'var(--text-on-honey)' }}
                     >
-                      Listo
+                      Guardá
                     </button>
                     <button
                       onClick={() => { eliminarPersona(p.id); setEditId(null); }}
                       className="flex-1 py-2 rounded-lg text-xs font-bold"
                       style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.25)' }}
                     >
-                      Borrar
+                      Que lo olvide
                     </button>
                   </div>
                 </div>
@@ -69,8 +69,11 @@ function QueSabeColmena({ personas, actualizarPersona, eliminarPersona }: {
                     <span style={{ color: 'var(--text-tertiary)', fontSize: 18 }}>›</span>
                   </div>
                   {p.temasRecurrentes.length > 0 && (
-                    <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
-                      Patrones: {p.temasRecurrentes.join(', ')}
+                    <p className="text-xs mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
+                      Suele aparecer cuando hablás de:{' '}
+                      {p.temasRecurrentes.map((tema, i) => (
+                        <span key={tema} className="hl-memory" style={{ marginLeft: i === 0 ? 4 : 0, marginRight: 4 }}>{tema}</span>
+                      ))}
                     </p>
                   )}
                   {p.notas && (
@@ -106,10 +109,10 @@ function ResumenSemanal({ tareas, habitos, transacciones, learningLessons }: {
 
   return (
     <div className="bm-card p-4" style={{ background: 'var(--bg-surface-warm)', border: '1px solid rgba(201,148,26,0.15)' }}>
-      <p className="sys-label mb-3" style={{ color: 'var(--honey-core)', opacity: 1 }}>RESUMEN DE LA SEMANA</p>
+      <p className="sys-label mb-3" style={{ color: 'var(--honey-core)' }}>Tu semana, en corto</p>
       {!hayDatos ? (
         <p className="text-xs leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
-          Empezá a usar AIcolmena y acá vas a ver tu resumen.
+          Todavía no pasó nada esta semana. Ya va a pasar.
         </p>
       ) : (
         <div className="space-y-2">
@@ -197,11 +200,11 @@ export default function Yo() {
         </div>
       </div>
 
+      {/* Lo que sé de vos — el corazón del producto, apenas debajo del avatar */}
+      <QueSabeColmena personas={personasImportantes} actualizarPersona={actualizarPersona} eliminarPersona={eliminarPersona} />
+
       {/* Resumen semanal */}
       <ResumenSemanal tareas={tareas} habitos={habitos} transacciones={transacciones} learningLessons={learningLessons} />
-
-      {/* Qué sabe Colmena de mí */}
-      <QueSabeColmena personas={personasImportantes} actualizarPersona={actualizarPersona} eliminarPersona={eliminarPersona} />
 
       {/* Stats de uso */}
       <div className="grid grid-cols-3 gap-2">
@@ -217,7 +220,7 @@ export default function Yo() {
       {/* Balance */}
       <div className="bm-card p-4 flex items-center justify-between">
         <div>
-          <p className="sys-label mb-1">BALANCE NETO</p>
+          <p className="sys-label mb-1">Cómo cierra la cuenta</p>
           <p className="text-xl font-black" style={{
             fontFamily: 'var(--font-display)',
             color: balance >= 0 ? 'var(--success)' : 'var(--danger)',
@@ -253,9 +256,9 @@ export default function Yo() {
 
       {/* Plan */}
       <div className="bm-card p-4">
-        <p className="sys-label mb-1" style={{ color: 'var(--violet-soft)' }}>PLAN ACTUAL</p>
-        <p className="text-lg font-black mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Gratis · Beta</p>
-        <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Acceso completo durante el beta. Sin límites.</p>
+        <p className="sys-label mb-1" style={{ color: 'var(--memory-soft)' }}>Tu plan</p>
+        <p className="text-lg font-black mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Beta abierta</p>
+        <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Mientras dure la beta, tenés todo. Después vemos.</p>
         <button
           className="w-full py-2.5 rounded-xl font-bold text-sm transition-all active:scale-[0.98]"
           style={{ background: 'var(--honey-core)', color: 'var(--text-on-honey)', boxShadow: 'var(--glow-honey)' }}
